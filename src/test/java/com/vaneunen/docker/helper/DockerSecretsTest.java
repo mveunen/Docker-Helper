@@ -1,6 +1,6 @@
 package com.vaneunen.docker.helper;
 
-import com.vaneunen.docker.exception.LoadDockerSecretException;
+import com.vaneunen.docker.exception.DockerSecretException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,7 +47,7 @@ public class DockerSecretsTest {
         assertEquals(Optional.empty(), DockerSecrets.getSecretValue("NonExistingValue"));
     }
 
-    @Test(expected = LoadDockerSecretException.class)
+    @Test(expected = DockerSecretException.class)
     public void noSecrets() {
         DockerSecrets.setSecretsPath("/non/existing/path");
     }

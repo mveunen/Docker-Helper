@@ -1,8 +1,6 @@
 package com.vaneunen.docker.helper;
 
 import com.vaneunen.docker.exception.DockerSecretException;
-import com.vaneunen.docker.exception.LoadDockerSecretException;
-import com.vaneunen.docker.exception.RetrieveDockerSecretException;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,12 +31,12 @@ public class DockerSecrets {
         return Optional.ofNullable(secrets.get(secretName));
     }
 
-    private static void loadSecrets() throws LoadDockerSecretException {
+    private static void loadSecrets() throws DockerSecretException {
         secrets = new HashMap<>();
 
         final File dockerSecretsDir = new File(dockerSecretsPath);
         if (!dockerSecretsDir.exists()) {
-            throw new LoadDockerSecretException("No secrets directory found: " + dockerSecretsDir.getAbsolutePath());
+            throw new DockerSecretException("No secrets directory found: " + dockerSecretsDir.getAbsolutePath());
         }
 
         final File[] secretFiles = dockerSecretsDir.listFiles();
@@ -48,7 +46,7 @@ public class DockerSecrets {
                 final String secretValue = new String(readAllBytes(file.toPath()));
                 secrets.put(secretName, secretValue);
             } catch (IOException e) {
-                throw new LoadDockerSecretException("Error while reading the secrets in: " + dockerSecretsDir.getAbsolutePath());
+                throw new DockerSecretException("Error while reading the secrets in: " + dockerSecretsDir.getAbsolutePath());
             }
         });
     }
