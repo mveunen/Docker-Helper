@@ -9,14 +9,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.nio.file.Files.readAllBytes;
 
 public class DockerSecrets {
 
     private static String dockerSecretsPath = "/run/secrets/";
-    private static final Map<String, String> secrets = new HashMap<>();
-    private static boolean initialized = false;
+    private static Map<String, String> secrets;
 
     /**
      * This method will return the value for the secretName in a Docker environment.
@@ -25,19 +25,16 @@ public class DockerSecrets {
      * @return the value of the secret
      * @throws DockerSecretException if there was an error retrieving the secret
      */
-    public static String getSecretValue(String secretName) throws DockerSecretException {
-        if (!initialized) {
+    public static Optional<String> getSecretValue(String secretName) throws DockerSecretException {
+        if (secrets == null) {
             loadSecrets();
         }
 
-        final String secretValue = secrets.get(secretName);
-        if(secretValue == null) {
-            throw new RetrieveDockerSecretException(secretName);
-        }
-        return secretValue;
+        return Optional.ofNullable(secrets.get(secretName));
     }
 
     private static void loadSecrets() throws LoadDockerSecretException {
+        secrets = new HashMap<>();
 
         final File dockerSecretsDir = new File(dockerSecretsPath);
         if (!dockerSecretsDir.exists()) {
@@ -45,10 +42,6 @@ public class DockerSecrets {
         }
 
         final File[] secretFiles = dockerSecretsDir.listFiles();
-        if (secretFiles == null || secretFiles.length == 0) {
-            throw new LoadDockerSecretException("No secrets found in: " + dockerSecretsDir.getAbsolutePath());
-        }
-
         Arrays.asList(secretFiles).forEach(file -> {
             try {
                 final String secretName = file.getName();
@@ -58,8 +51,6 @@ public class DockerSecrets {
                 throw new LoadDockerSecretException("Error while reading the secrets in: " + dockerSecretsDir.getAbsolutePath());
             }
         });
-
-        initialized = true;
     }
 
     /**
@@ -69,6 +60,6 @@ public class DockerSecrets {
      */
     static final void setSecretsPath(String path) {
         dockerSecretsPath = path;
-        initialized = false;
+        loadSecrets();
     }
 }

@@ -1,7 +1,6 @@
 package com.vaneunen.docker.helper;
 
 import com.vaneunen.docker.exception.LoadDockerSecretException;
-import com.vaneunen.docker.exception.RetrieveDockerSecretException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,6 +9,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 
@@ -25,33 +25,30 @@ public class DockerSecretsTest {
 
     @Test
     public void secretFound() throws IOException {
-        DockerSecrets.setSecretsPath(secretsDir.getAbsolutePath());
-
         File secretFile = new File(secretsDir, "ExistingValue");
         FileWriter writer = new FileWriter(secretFile);
         writer.write("SomeValue");
         writer.close();
+        DockerSecrets.setSecretsPath(secretsDir.getAbsolutePath());
 
-        String value = DockerSecrets.getSecretValue("ExistingValue");
-        assertEquals("SomeValue", value);
+        Optional<String> value = DockerSecrets.getSecretValue("ExistingValue");
+        assertEquals("SomeValue", value.get());
     }
 
-    @Test(expected = RetrieveDockerSecretException.class)
+    @Test
     public void secretsNotFoundWhileNoSecrets() throws IOException {
-        DockerSecrets.setSecretsPath(secretsDir.getAbsolutePath());
 
         File secretFile = new File(secretsDir, "testSecret");
         FileWriter writer = new FileWriter(secretFile);
         writer.write("SomeValue");
         writer.close();
+        DockerSecrets.setSecretsPath(secretsDir.getAbsolutePath());
 
-        DockerSecrets.getSecretValue("NonExistingValue");
+        assertEquals(Optional.empty(), DockerSecrets.getSecretValue("NonExistingValue"));
     }
 
     @Test(expected = LoadDockerSecretException.class)
     public void noSecrets() {
         DockerSecrets.setSecretsPath("/non/existing/path");
-
-        DockerSecrets.getSecretValue("NonExistingValue");
     }
 }
