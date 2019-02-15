@@ -29,10 +29,30 @@ public class DockerSecretsTest {
         FileWriter writer = new FileWriter(secretFile);
         writer.write("SomeValue");
         writer.close();
-        DockerSecrets.setSecretsPath(secretsDir.getAbsolutePath());
 
-        Optional<String> value = DockerSecrets.getSecretValue("ExistingValue");
+        DockerSecrets dockerSecrets = new DockerSecrets();
+        dockerSecrets.setSecretsPath(secretsDir.getAbsolutePath());
+
+        Optional<String> value = dockerSecrets.getSecretValue("ExistingValue");
         assertEquals("SomeValue", value.get());
+    }
+
+    @Test
+    public void secretFound2() throws IOException {
+        File secretFile = new File(secretsDir, "ExistingValue");
+        FileWriter writer = new FileWriter(secretFile);
+        writer.write("SomeValue");
+        writer.close();
+
+        DockerSecrets dockerSecrets = new DockerSecrets();
+        dockerSecrets.setSecretsPath(secretsDir.getAbsolutePath());
+
+        Optional<String> value = dockerSecrets.getSecretValue("ExistingValue");
+        assertEquals("SomeValue", value.get());
+
+        DockerSecrets dockerSecrets2 = new DockerSecrets();
+        Optional<String> value2 = dockerSecrets2.getSecretValue("ExistingValue");
+        assertEquals("SomeValue", value2.get());
     }
 
     @Test
@@ -42,13 +62,16 @@ public class DockerSecretsTest {
         FileWriter writer = new FileWriter(secretFile);
         writer.write("SomeValue");
         writer.close();
-        DockerSecrets.setSecretsPath(secretsDir.getAbsolutePath());
+        DockerSecrets dockerSecrets = new DockerSecrets();
+        dockerSecrets.setSecretsPath(secretsDir.getAbsolutePath());
 
-        assertEquals(Optional.empty(), DockerSecrets.getSecretValue("NonExistingValue"));
+        assertEquals(Optional.empty(), dockerSecrets.getSecretValue("NonExistingValue"));
     }
 
     @Test(expected = DockerSecretException.class)
     public void noSecrets() {
-        DockerSecrets.setSecretsPath("/non/existing/path");
+        DockerSecrets dockerSecrets = new DockerSecrets();
+
+        dockerSecrets.setSecretsPath("/non/existing/path");
     }
 }

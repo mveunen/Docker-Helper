@@ -23,7 +23,7 @@ public class DockerSecrets {
      * @return the value of the secret
      * @throws DockerSecretException if there was an error retrieving the secret
      */
-    public static Optional<String> getSecretValue(String secretName) throws DockerSecretException {
+    public Optional<String> getSecretValue(String secretName) throws DockerSecretException {
         if (secrets == null) {
             loadSecrets();
         }
@@ -31,7 +31,7 @@ public class DockerSecrets {
         return Optional.ofNullable(secrets.get(secretName));
     }
 
-    private static void loadSecrets() throws DockerSecretException {
+    private void loadSecrets() throws DockerSecretException {
         secrets = new HashMap<>();
 
         final File dockerSecretsDir = new File(dockerSecretsPath);
@@ -56,7 +56,7 @@ public class DockerSecrets {
      *
      * @param path is the path in which the Docker secrets are located
      */
-    static final void setSecretsPath(String path) {
+    final void setSecretsPath(String path) {
         dockerSecretsPath = path;
         loadSecrets();
     }
